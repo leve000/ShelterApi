@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using ShelterApi.Models;
 
 namespace ShelterApi.Data;
 
@@ -46,30 +46,4 @@ public class AnimalshelterContext : DbContext
                 .HasColumnType("datetime");
         });
     }
-}
-
-public class Animal
-{
-    public Guid Id { get; set; }
-    public string? Name { get; set; }
-    public string? Species { get; set; }
-    public int? Age { get; set; }
-    public double? Weight { get; set; }
-    public DateTime? RegTime { get; set; }
-    public Guid? ShelterId { get; set; }
-
-    [JsonIgnore]
-    public virtual Shelter? Shelter { get; set; }
-}
-
-public class Shelter
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string City { get; set; } = null!;
-    public int Capacity { get; set; }
-    public DateTime? RegTime { get; set; }
-
-    [JsonIgnore]
-    public virtual ICollection<Animal> Animals { get; set; } = new List<Animal>();
 }
