@@ -15,152 +15,30 @@ public class QueriesController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("allSheltersWithAnimals")]
-    public async Task<IActionResult> AllSheltersWithAnimals()
+    [HttpPost("NewAnimal")]
+
+    public async Task<IActionResult> CreateAnimal(NewAnimalDto dto)
     {
         try
         {
-            var shelters = await _context.Shelters
-                .Include(s => s.Animals)
-                .AsNoTracking()
-                .Select(s => new
-                {
-                    s.Id,
-                    s.Name,
-                    s.City,
-                    s.Capacity,
-                    s.RegTime,
-                    Animals = s.Animals.Select(a => new
-                    {
-                        a.Id,
-                        a.Name,
-                        a.Species,
-                        a.Age,
-                        a.Weight,
-                        a.RegTime,
-                        a.ShelterId
-                    }).ToList()
-                })
-                .ToListAsync();
-
-            if (shelters.Count == 0)
+            if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Species) || dto.Age < 0)
             {
-                return NotFound(new { message = "Nincs rögzített menhely.", result = (object?)null });
+                return BadRequest(new { message = "Az állat neve, fajtája és nem negatív életkora kötelező.", result = (object?)null });
             }
-
-            return Ok(new { message = "A menhelyek és állataik lekérdezése sikeres.", result = shelters });
+            var animal = new Animal
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Species = dto.Species,
+                Age = dto.Age
+            };
+            _context.Animals.Add(animal);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Az állat létrehozása sikeres.", result = animal });
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "A menhelyek és állataik lekérdezése sikertelen.", result = (object?)null });
-        }
-    }
-
-    [HttpGet("allAnimalsWithShelter")]
-    public async Task<IActionResult> AllAnimalsWithShelter()
-    {
-        try
-        {
-            var animals = await _context.Animals
-                .Join(
-                    _context.Shelters,
-                    animal => animal.ShelterId,
-                    shelter => shelter.Id,
-                    (animal, shelter) => new
-                    {
-                        animal.Id,
-                        animal.Name,
-                        animal.Species,
-                        animal.Age,
-                        animal.Weight,
-                        animal.RegTime,
-                        animal.ShelterId,
-                        ShelterName = shelter.Name
-                    })
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (animals.Count == 0)
-            {
-                return NotFound(new { message = "Nincs menhelyhez kapcsolódó állat.", result = (object?)null });
-            }
-
-            return Ok(new { message = "Az állatok és menhelyeik lekérdezése sikeres.", result = animals });
-        }
-        catch (Exception)
-        {
-            return BadRequest(new { message = "Az állatok és menhelyeik lekérdezése sikertelen.", result = (object?)null });
-        }
-    }
-
-    [HttpGet("animalsOfShelter")]
-    public async Task<IActionResult> AnimalsOfShelter([FromQuery] Guid shelterId)
-    {
-        try
-        {
-            var shelter = await _context.Shelters
-                .Include(s => s.Animals)
-                .AsNoTracking()
-                .Where(s => s.Id == shelterId)
-                .Select(s => new
-                {
-                    s.Id,
-                    s.Name,
-                    s.City,
-                    s.Capacity,
-                    s.RegTime,
-                    Animals = s.Animals.Select(a => new
-                    {
-                        a.Id,
-                        a.Name,
-                        a.Species,
-                        a.Age,
-                        a.Weight,
-                        a.RegTime,
-                        a.ShelterId
-                    }).ToList()
-                })
-                .FirstOrDefaultAsync();
-
-            if (shelter is null)
-            {
-                return NotFound(new { message = "A menhely nem található.", result = (object?)null });
-            }
-
-            return Ok(new { message = "A menhely és állatainak lekérdezése sikeres.", result = shelter });
-        }
-        catch (Exception)
-        {
-            return BadRequest(new { message = "A menhely és állatainak lekérdezése sikertelen.", result = (object?)null });
-        }
-    }
-
-    [HttpGet("animalCountByShelter")]
-    public async Task<IActionResult> AnimalCountByShelter()
-    {
-        try
-        {
-            var counts = await _context.Shelters
-                .AsNoTracking()
-                .Select(s => new
-                {
-                    ShelterId = s.Id,
-                    ShelterName = s.Name,
-                    AnimalCount = s.Animals.Count()
-                })
-                .OrderByDescending(s => s.AnimalCount)
-                .ToListAsync();
-
-            if (counts.Count == 0)
-            {
-                return NotFound(new { message = "Nincs rögzített menhely.", result = (object?)null });
-            }
-
-            return Ok(new { message = "Az állatok menhelyenkénti darabszámának lekérdezése sikeres.", result = counts });
-        }
-        catch (Exception)
-        {
-            return BadRequest(new { message = "Az állatok menhelyenkénti darabszámának lekérdezése sikertelen.", result = (object?)null });
+            return BadRequest(new { message = "Az állat létrehozása sikertelen.", result = (object?)null });
         }
     }
 }
