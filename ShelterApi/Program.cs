@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using ShelterApi.Data;
 using ShelterApi.Models;
 
 namespace ShelterApi

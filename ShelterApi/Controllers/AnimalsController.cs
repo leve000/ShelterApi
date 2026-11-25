@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ShelterApi.Data;
 using ShelterApi.Models;
 using ShelterApi.Models.DTOs;
-using ShelterApi.Models.Entities;
 
 namespace ShelterApi.Controllers;
 
