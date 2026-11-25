@@ -1,23 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace ShelterApi.Models;
+namespace ShelterApi.Models.Entities;
 
 public partial class Animal
 {
     public Guid Id { get; set; }
-
     public string? Name { get; set; }
-
     public string? Species { get; set; }
-
     public int? Age { get; set; }
-
     public double? Weight { get; set; }
-
     public DateTime? RegTime { get; set; }
-
     public Guid? ShelterId { get; set; }
 
     [JsonIgnore]
